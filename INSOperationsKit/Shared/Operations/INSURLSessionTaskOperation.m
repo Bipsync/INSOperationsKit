@@ -13,7 +13,7 @@ static void *INSDownloadOperationContext = &INSDownloadOperationContext;
 
 @interface INSURLSessionTaskOperation ()
 @property (nonatomic, strong) NSURLSessionTask *task;
-@property (nonatomic) BOOL observerRemoved;
+@property (nonatomic) BOOL isObservingTask;
 @end
 
 @implementation INSURLSessionTaskOperation
@@ -22,7 +22,7 @@ static void *INSDownloadOperationContext = &INSDownloadOperationContext;
     if (self = [super init]) {
         NSAssert(task.state == NSURLSessionTaskStateSuspended, @"Tasks must be suspended.");
         self.task = task;
-        self.observerRemoved = NO;
+        self.isObservingTask = NO;
     }
     return self;
 }
@@ -40,6 +40,8 @@ static void *INSDownloadOperationContext = &INSDownloadOperationContext;
     NSAssert(self.task.state == NSURLSessionTaskStateSuspended, @"Task was resumed by something other than %@.",NSStringFromClass([self class]));
 
     [self.task addObserver:self forKeyPath:@"state" options:NSKeyValueObservingOptionNew context:INSDownloadOperationContext];
+    self.isObservingTask = YES;
+
     [self.task resume];
 }
 
@@ -55,15 +57,17 @@ static void *INSDownloadOperationContext = &INSDownloadOperationContext;
     }
 
     @synchronized (self) {
-        if (object == self.task && [keyPath isEqualToString:@"state"] && !self.observerRemoved) {
+        if (object == self.task && [keyPath isEqualToString:@"state"]) {
             switch (self.task.state) {
                 case NSURLSessionTaskStateCompleted:
                     [self finish];
                     // fallthrough
 
                 case NSURLSessionTaskStateCanceling:
-                    self.observerRemoved = YES;
-                    [self.task removeObserver:self forKeyPath:@"state" context:context];
+                    if (self.isObservingTask) {
+                        self.isObservingTask = NO;
+                        [self.task removeObserver:self forKeyPath:@"state" context:context];
+                    }
 
                 default:
                     break;
@@ -75,6 +79,12 @@ static void *INSDownloadOperationContext = &INSDownloadOperationContext;
 - (void)cancel {
     [self.task cancel];
     [super cancel];
+}
+
+- (void)dealloc {
+    if (_isObservingTask) {
+        [self.task removeObserver:self forKeyPath:@"state" context:INSDownloadOperationContext];
+    }
 }
 
 @end
