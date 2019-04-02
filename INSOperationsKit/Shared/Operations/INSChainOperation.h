@@ -21,6 +21,7 @@
 
  */
 @interface INSChainOperation : INSOperation
+@property (nonatomic, strong, nonnull, readonly) INSOperationQueue *internalQueue;
 @property (nonatomic, assign) BOOL finishIfProducedAnyError;
 + (nonnull instancetype)operationWithOperations:(nonnull NSArray <NSOperation <INSChainableOperationProtocol> *>*)operations;
 - (nonnull instancetype)initWithOperations:(nonnull NSArray <NSOperation <INSChainableOperationProtocol> *>*)operations;
