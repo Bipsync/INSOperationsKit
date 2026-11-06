@@ -1,3 +1,13 @@
+> [!WARNING]
+> **Deprecated. This fork is no longer changed.**
+>
+> Bipsync's copy of INSOperationsKit now lives in
+> [Bipsync/bipsync-notes-ios-insoperationskit](https://github.com/Bipsync/bipsync-notes-ios-insoperationskit),
+> which builds it as a static-library `.xcframework` for the Bipsync iOS app. Make any future
+> changes there.
+>
+> This fork is kept as the recorded base for that repo (commit `fdfe423`). Please don't delete it.
+
 [![](http://inspace.io/github-cover.jpg)](http://inspace.io)
 
 # INSOperationsKit
